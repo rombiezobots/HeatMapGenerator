@@ -106,13 +106,15 @@ def calculate_distances():
     log(f'Using start frame {start_frame}, end frame {end_frame}, and step {scene.frame_step}')
     wm.progress_begin(0, 100)
 
+    # Create BMesh
+    bpy.ops.object.mode_set(mode='EDIT')
+    bmesh_data = bmesh.from_edit_mesh(ob.data)
+    # Loop over frames
     for i in range(start_frame, end_frame + 1, scene.frame_step):
         # Set the current frame (using the method is important
         # for Blender to be aware of this)
         scene.frame_set(i)
         # Get vertices from mesh
-        bpy.ops.object.mode_set(mode='EDIT')
-        bmesh_data = bmesh.from_edit_mesh(ob.data)
         for v in bmesh_data.verts:
             if vertex_is_visible(vertex=v):
                 distance = distance_to_camera(vertex=v)
@@ -125,6 +127,9 @@ def calculate_distances():
         log(f'Frame: {i}')
         progress = int((i - start_frame) / (end_frame - start_frame) * 100)
         wm.progress_update(progress)
+
+    # Clean up the bmesh to lower memory impact
+    bmesh_data.free()
     # End progress indicator
     wm.progress_end()
     # Go back to previous mode
