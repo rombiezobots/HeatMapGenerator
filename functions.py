@@ -30,13 +30,13 @@ def scene_has_active_camera() -> bool:
     return bpy.context.scene.camera != None
 
 
-def vertex_group_is_writable() -> bool:
-    settings = bpy.context.scene.heat_map_generator_settings
-    return settings.group_name != ''
-
-
 def distance_dict_is_not_empty() -> bool:
     return len(vertex_distances) > 0
+
+
+def active_vertex_group() -> bool:
+    active_ob = bpy.context.object
+    return active_ob.vertex_groups and active_ob.vertex_groups.active
 
 
 def update_tresholds(self, context) -> None:
@@ -48,7 +48,7 @@ def update_tresholds(self, context) -> None:
 
 
 def calculate_distances():
-    """Create vertex group on target mesh with values based on distance to camera"""
+    """Measure vertex distances, retaining lowest values over time"""
 
     # bpy.context.mode returns different values than
     # bpy.ops.object.mode_set(mode) accepts.
@@ -132,10 +132,9 @@ def calculate_distances():
 
 
 def paint_vertex_weights():
+    """Normalise the sampled vertex distances, and store the values in the active Vertex Group"""
     settings = bpy.context.scene.heat_map_generator_settings
-    # Create the vertex group
-    vertex_group = bpy.context.object.vertex_groups.new(
-        name=settings.group_name)
+    # Go into Weight Paint mode so we can see the result
     bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
     # Determine min and max distance
     distances = [distance for distance in vertex_distances.values()]
@@ -148,8 +147,10 @@ def paint_vertex_weights():
     for index in vertex_distances:
         distance = vertex_distances[index]
         normalised_distance = 1 - (distance - min_dist) / (max_dist - min_dist)
-        vertex_group.add(
-            index=[index], weight=normalised_distance, type='REPLACE')
+        vertex_group = bpy.context.object.vertex_groups.active
+        vertex_group.add(index=[index],
+                         weight=normalised_distance,
+                         type='REPLACE')
 
 
 def log(message: str):

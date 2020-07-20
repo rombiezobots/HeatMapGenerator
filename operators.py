@@ -45,8 +45,8 @@ class HEATMAPGENERATOR_OT_paint(bpy.types.Operator):
     def poll(cls, context):
         ob_is_local_mesh = functions.active_object_is_local_mesh()
         have_distances = functions.distance_dict_is_not_empty()
-        vertex_group_ok = functions.vertex_group_is_writable()
-        return ob_is_local_mesh and have_distances and vertex_group_ok
+        active_vertex_group = functions.active_vertex_group()
+        return ob_is_local_mesh and have_distances and active_vertex_group
 
     def execute(self, context):
         functions.paint_vertex_weights()

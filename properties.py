@@ -17,9 +17,6 @@ else:
 
 
 class Settings(bpy.types.PropertyGroup):
-    group_name: bpy.props.StringProperty(name='New Vertex Group',
-                                         default='HeatMap',
-                                         options={'SKIP_SAVE'})
     use_tresholds: bpy.props.BoolProperty(name='Use Tresholds',
                                           options={'SKIP_SAVE'},
                                           update=functions.update_tresholds,

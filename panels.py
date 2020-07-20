@@ -60,10 +60,7 @@ class VIEW3D_PT_heat_map_painting(bpy.types.Panel):
         lay.use_property_split = True
         lay.use_property_decorate = False
         lay.enabled = functions.distance_dict_is_not_empty()
-        lay.prop(settings, 'group_name')
-        lay.separator()
-        col = lay.column()
-        col.prop(settings, 'use_tresholds')
+        lay.prop(settings, 'use_tresholds')
         col = lay.column(align=True)
         col.enabled = settings.use_tresholds
         col.prop(settings, 'weight_low_bound')
