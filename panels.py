@@ -3,8 +3,12 @@
 ##############################################################################
 
 
-import bpy
-from HeatMapGenerator import functions
+if 'functions' in locals():
+    import importlib
+    functions = importlib.reload(functions)
+else:
+    from HeatMapGenerator import functions
+    import bpy
 
 
 ##############################################################################
@@ -26,7 +30,6 @@ class VIEW3D_PT_heat_map_generator(bpy.types.Panel):
         lay = self.layout
         lay.use_property_split = True
         lay.prop(settings, 'mesh')
-        lay.prop(settings, 'group_name')
         lay.separator()
         col = lay.column()
         col.enabled = functions.dont_use_scene_start_end_frames()
@@ -38,6 +41,12 @@ class VIEW3D_PT_heat_map_generator(bpy.types.Panel):
         row = lay.row()
         row.scale_y = 1.5
         row.operator('heat_map_generator.run')
+        lay.separator()
+        lay.prop(settings, 'group_name')
+        lay.separator()
+        row = lay.row()
+        row.scale_y = 1.5
+        row.operator('heat_map_generator.paint')
 
 
 ##############################################################################
