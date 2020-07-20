@@ -40,7 +40,7 @@ def active_vertex_group() -> bool:
 
 
 def update_tresholds(self, context) -> None:
-    distances = [distance for distance in vertex_distances.values()]
+    distances = vertex_distances.values()
     settings = bpy.context.scene.heat_map_generator_settings
     settings.weight_low_bound = min(distances)
     settings.weight_high_bound = max(distances)
@@ -141,7 +141,7 @@ def paint_vertex_weights():
     # Go into Weight Paint mode so we can see the result
     bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
     # Determine min and max distance
-    distances = [distance for distance in vertex_distances.values()]
+    distances = vertex_distances.values()
     min_dist = min(distances)
     max_dist = max(distances)
     if settings.use_tresholds:
