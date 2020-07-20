@@ -17,21 +17,9 @@ else:
 
 
 class Settings(bpy.types.PropertyGroup):
-    use_frame_step: bpy.props.BoolProperty(name="Use Frame Step",
-                                           options={'SKIP_SAVE'},
-                                           default=True,
-                                           description='Use the Scene\'s Frame Step')
     group_name: bpy.props.StringProperty(name='New Vertex Group',
                                          default='HeatMap',
                                          options={'SKIP_SAVE'})
-    frame_range: bpy.props.EnumProperty(name='Frame Range',
-                                        items=[
-                                            ('output', 'Scene Output',
-                                             'Use the frame range defined in the Scene\'s output settings'),
-                                            ('preview', 'Timeline Preview',
-                                             'Use the Preview frame range defined in the Timeline')
-                                        ],
-                                        options={'SKIP_SAVE'})
     use_tresholds: bpy.props.BoolProperty(name='Use Tresholds',
                                           options={'SKIP_SAVE'},
                                           update=functions.update_tresholds,

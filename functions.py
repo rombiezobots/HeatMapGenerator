@@ -43,7 +43,7 @@ def update_tresholds(self, context) -> None:
     distances = [distance for distance in vertex_distances.values()]
     settings = bpy.context.scene.heat_map_generator_settings
     settings.weight_low_bound = min(distances)
-    settings.weight_high_bound = max(distances)]
+    settings.weight_high_bound = max(distances)
     return None
 
 
@@ -53,13 +53,9 @@ def calculate_distances():
     def frame_range() -> tuple:
         """Return the frame range based on whether we want the Scene settings or the Preview ones."""
         scene = bpy.context.scene
-        settings = scene.heat_map_generator_settings
-        start_frame = scene.frame_start
-        end_frame = scene.frame_end
-        if settings.frame_range == 'preview':
-            start_frame = scene.frame_preview_start
-            end_frame = scene.frame_preview_end
-        return start_frame, end_frame
+        if scene.use_preview_range:
+            return scene.frame_preview_start, scene.frame_preview_end
+        return scene.frame_start, scene.frame_end
 
     def vertex_is_visible(vertex: bmesh.types.BMVert) -> bool:
         """Convert the vertex's coordinates into camera space, and check
@@ -77,10 +73,14 @@ def calculate_distances():
 
     def distance_to_camera(vertex: bmesh.types.BMVert) -> float:
         """Calculate the vertex's distance to the camera."""
-        cam=bpy.context.scene.camera
-        ob=bpy.context.object
+        cam = bpy.context.scene.camera
+        ob = bpy.context.object
         return (ob.matrix_world @ vertex.co -
                 cam.matrix_world.translation).length
+
+    scene = bpy.context.scene
+    ob = bpy.context.object
+    wm = bpy.context.window_manager
 
     # Clear the vertex distance dict
     vertex_distances.clear()
@@ -89,22 +89,19 @@ def calculate_distances():
         if area.type == 'VIEW_3D':
             area.spaces[0].region_3d.view_perspective = 'CAMERA'
     # Determine frame settings
-    step = 1
-    if bpy.context.scene.heat_map_generator_settings.use_frame_step:
-        step = bpy.context.scene.frame_step
     start_frame, end_frame = frame_range()
     # Report logs and start progress indicator
-    log(f'Calculating vertex distances for object {bpy.context.object.name}')
-    log(f'Using start frame {start_frame}, end frame {end_frame}, and step {step}')
-    bpy.context.window_manager.progress_begin(0, 100)
+    log(f'Calculating vertex distances for object {ob.name}')
+    log(f'Using start frame {start_frame}, end frame {end_frame}, and step {scene.frame_step}')
+    wm.progress_begin(0, 100)
 
-    for i in range(start_frame, end_frame + 1, step):
+    for i in range(start_frame, end_frame + 1, scene.frame_step):
         # Set the current frame (using the context is important
         # for Blender to be aware of this)
-        bpy.context.scene.frame_set(i)
+        scene.frame_set(i)
         # Get vertices from mesh
         bpy.ops.object.mode_set(mode='EDIT')
-        bmesh_data = bmesh.from_edit_mesh(bpy.context.object.data)
+        bmesh_data = bmesh.from_edit_mesh(ob.data)
         for v in bmesh_data.verts:
             if vertex_is_visible(vertex=v):
                 distance = distance_to_camera(vertex=v)
@@ -116,9 +113,9 @@ def calculate_distances():
         # Update progress
         log(f'Frame: {i}')
         progress = int((i - start_frame) / (end_frame - start_frame) * 100)
-        bpy.context.window_manager.progress_update(progress)
+        wm.progress_update(progress)
     # End progress indicator
-    bpy.context.window_manager.progress_end()
+    wm.progress_end()
     # Switch to Object Mode
     bpy.ops.object.mode_set(mode='OBJECT')
 

@@ -29,8 +29,8 @@ class VIEW3D_PT_heat_map_generator(bpy.types.Panel):
         settings = context.scene.heat_map_generator_settings
         lay = self.layout
         lay.use_property_split = True
-        lay.prop(settings, 'frame_range')
-        lay.prop(settings, 'use_frame_step')
+        lay.prop(context.scene, 'use_preview_range', toggle=0)
+        lay.prop(context.scene, 'frame_step')
         lay.separator()
         row = lay.row()
         row.scale_y = 1.5
