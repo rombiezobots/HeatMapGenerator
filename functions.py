@@ -132,7 +132,7 @@ def calculate_distances():
 
 
 def paint_vertex_weights():
-    """Normalise the sampled vertex distances, and store the values in the active Vertex Group"""
+    """Normalise sampled distances and store them in the active Vertex Group"""
     settings = bpy.context.scene.heat_map_generator_settings
     # Go into Weight Paint mode so we can see the result
     bpy.ops.object.mode_set(mode='WEIGHT_PAINT')

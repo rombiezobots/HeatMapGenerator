@@ -16,68 +16,37 @@ else:
 ##############################################################################
 
 
-class VIEW3D_PT_heat_map_generator(bpy.types.Panel):
+class PROPERTIES_PT_heat_map_generator(bpy.types.Panel):
 
-    bl_idname = 'VIEW3D_PT_heat_map_generator'
     bl_label = 'Heat Map Generator'
-    bl_category = 'Tool'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-
-    def draw(self, context):
-        pass
-
-
-class VIEW3D_PT_heat_map_measuring(bpy.types.Panel):
-
-    bl_label = 'Measure Vertex Distances'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_parent_id = 'VIEW3D_PT_heat_map_generator'
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_parent_id = 'DATA_PT_vertex_groups'
+    bl_context = 'data'
 
     def draw(self, context):
         lay = self.layout
         lay.use_property_split = True
         lay.use_property_decorate = False
-        lay.prop(context.scene, 'use_preview_range', toggle=0)
-        lay.prop(context.scene, 'frame_step')
-        lay.separator()
-        row = lay.row()
+        row = lay.row(align=True)
         row.scale_y = 1.5
-        row.operator('heat_map_generator.run')
-
-
-class VIEW3D_PT_heat_map_painting(bpy.types.Panel):
-
-    bl_label = 'Paint Weights'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_parent_id = 'VIEW3D_PT_heat_map_generator'
-
-    def draw(self, context):
+        row.operator('heat_map_generator.run', icon='OUTLINER_OB_CAMERA')
+        row.operator('heat_map_generator.paint', icon='BRUSHES_ALL')
         settings = context.scene.heat_map_generator_settings
-        lay = self.layout
-        lay.use_property_split = True
-        lay.use_property_decorate = False
-        lay.enabled = functions.distance_dict_is_not_empty()
-        lay.prop(settings, 'use_tresholds')
-        col = lay.column(align=True)
-        col.enabled = settings.use_tresholds
-        col.prop(settings, 'weight_low_bound')
-        col.prop(settings, 'weight_high_bound')
         lay.separator()
-        row = lay.row()
-        row.scale_y = 1.5
-        row.operator('heat_map_generator.paint')
+        col_paint = lay.column()
+        col_paint.prop(settings, 'use_tresholds')
+        col_paint.enabled = functions.distance_dict_is_not_empty()
+        sub_tresholds = col_paint.column(align=True)
+        sub_tresholds.enabled = settings.use_tresholds
+        sub_tresholds.prop(settings, 'weight_low_bound')
+        sub_tresholds.prop(settings, 'weight_high_bound')
 
 
 ##############################################################################
 # Registration
 ##############################################################################
 
-
 register, unregister = bpy.utils.register_classes_factory([
-    VIEW3D_PT_heat_map_generator,
-    VIEW3D_PT_heat_map_measuring,
-    VIEW3D_PT_heat_map_painting
+    PROPERTIES_PT_heat_map_generator
 ])

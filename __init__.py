@@ -29,8 +29,8 @@ bl_info = {
     'author': 'Sam Van Hulle',
     'version': (1, 0, 0),
     'blender': (2, 83, 0),
-    'location': 'View3D > Sidebar',
-    'category': 'Mesh'
+    'location': 'Properties > Mesh Data > Vertex Groups',
+    'category': 'Paint'
 }
 
 

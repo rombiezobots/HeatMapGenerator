@@ -17,7 +17,7 @@ else:
 
 
 class HEATMAPGENERATOR_OT_run(bpy.types.Operator):
-    """For every vertex, calculate its lowest distance to the camera over time"""
+    """Measure vertex distances, retaining lowest values over time"""
 
     bl_idname = "heat_map_generator.run"
     bl_label = "Measure"
@@ -35,7 +35,7 @@ class HEATMAPGENERATOR_OT_run(bpy.types.Operator):
 
 
 class HEATMAPGENERATOR_OT_paint(bpy.types.Operator):
-    """Normalize vertex distances and store them in a vertex group"""
+    """Normalise sampled distances and store them in the active Vertex Group"""
 
     bl_idname = "heat_map_generator.paint"
     bl_label = "Paint"
