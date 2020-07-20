@@ -129,6 +129,10 @@ def calculate_distances():
     wm.progress_end()
     # Go back to previous mode
     bpy.ops.object.mode_set(mode=context_mode_remap[original_mode])
+    # Set tresholds
+    settings = bpy.context.scene.heat_map_generator_settings
+    settings.weight_low_bound = min(vertex_distances.values())
+    settings.weight_high_bound = max(vertex_distances.values())
 
 
 def paint_vertex_weights():

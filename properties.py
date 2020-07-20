@@ -21,13 +21,17 @@ class Settings(bpy.types.PropertyGroup):
                                           options={'SKIP_SAVE'},
                                           update=functions.update_tresholds,
                                           description='Use custom distance tresholds instead of the sampled extremes')
-    weight_low_bound: bpy.props.FloatProperty(name='Low Treshold',
+    weight_low_bound: bpy.props.FloatProperty(name='Lower Treshold',
                                               subtype='DISTANCE',
                                               options={'SKIP_SAVE'},
+                                              min=0.0, soft_min=0.0,
+                                              precision=2,
                                               description='If higher than the sampled minimum, this replaces it as the lower limit of the vertex weights')
-    weight_high_bound: bpy.props.FloatProperty(name='High Treshold',
+    weight_high_bound: bpy.props.FloatProperty(name='Upper Treshold',
                                                subtype='DISTANCE',
                                                options={'SKIP_SAVE'},
+                                               precision=2,
+                                               min=0.1, soft_min=0.1,
                                                description='If lower than the sampled maximum, this replaces it as the higher limit of the vertex weights')
 
 
