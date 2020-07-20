@@ -50,6 +50,15 @@ def update_tresholds(self, context) -> None:
 def calculate_distances():
     """Create vertex group on target mesh with values based on distance to camera"""
 
+    # bpy.context.mode returns different values than
+    # bpy.ops.object.mode_set(mode) accepts.
+    context_mode_remap = {
+        'EDIT_MESH': 'EDIT',
+        'PAINT_WEIGHT': 'WEIGHT_PAINT',
+        'PAINT_VERTEX': 'VERTEX_PAINT',
+        'PAINT_TEXTURE': 'TEXTURE_PAINT'
+    }
+
     def frame_range() -> tuple:
         """Return the frame range based on whether we want the Scene settings or the Preview ones."""
         scene = bpy.context.scene
@@ -90,13 +99,15 @@ def calculate_distances():
             area.spaces[0].region_3d.view_perspective = 'CAMERA'
     # Determine frame settings
     start_frame, end_frame = frame_range()
+    # Store current mode
+    original_mode = bpy.context.mode
     # Report logs and start progress indicator
     log(f'Calculating vertex distances for object {ob.name}')
     log(f'Using start frame {start_frame}, end frame {end_frame}, and step {scene.frame_step}')
     wm.progress_begin(0, 100)
 
     for i in range(start_frame, end_frame + 1, scene.frame_step):
-        # Set the current frame (using the context is important
+        # Set the current frame (using the method is important
         # for Blender to be aware of this)
         scene.frame_set(i)
         # Get vertices from mesh
@@ -116,8 +127,8 @@ def calculate_distances():
         wm.progress_update(progress)
     # End progress indicator
     wm.progress_end()
-    # Switch to Object Mode
-    bpy.ops.object.mode_set(mode='OBJECT')
+    # Go back to previous mode
+    bpy.ops.object.mode_set(mode=context_mode_remap[original_mode])
 
 
 def paint_vertex_weights():
