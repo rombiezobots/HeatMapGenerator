@@ -32,6 +32,18 @@ class Settings(bpy.types.PropertyGroup):
                                              'Use the Preview frame range defined in the Timeline')
                                         ],
                                         options={'SKIP_SAVE'})
+    use_tresholds: bpy.props.BoolProperty(name='Use Tresholds',
+                                          options={'SKIP_SAVE'},
+                                          update=functions.update_tresholds,
+                                          description='Use custom distance tresholds instead of the sampled extremes')
+    weight_low_bound: bpy.props.FloatProperty(name='Low Treshold',
+                                              subtype='DISTANCE',
+                                              options={'SKIP_SAVE'},
+                                              description='If higher than the sampled minimum, this replaces it as the lower limit of the vertex weights')
+    weight_high_bound: bpy.props.FloatProperty(name='High Treshold',
+                                               subtype='DISTANCE',
+                                               options={'SKIP_SAVE'},
+                                               description='If lower than the sampled maximum, this replaces it as the higher limit of the vertex weights')
 
 
 ##############################################################################

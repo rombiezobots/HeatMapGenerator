@@ -39,6 +39,14 @@ def distance_dict_is_not_empty() -> bool:
     return len(vertex_distances) > 0
 
 
+def update_tresholds(self, context) -> None:
+    distances = [distance for distance in vertex_distances.values()]
+    settings = bpy.context.scene.heat_map_generator_settings
+    settings.weight_low_bound = min(distances)
+    settings.weight_high_bound = max(distances)]
+    return None
+
+
 def calculate_distances():
     """Create vertex group on target mesh with values based on distance to camera"""
 
@@ -69,8 +77,8 @@ def calculate_distances():
 
     def distance_to_camera(vertex: bmesh.types.BMVert) -> float:
         """Calculate the vertex's distance to the camera."""
-        cam = bpy.context.scene.camera
-        ob = bpy.context.object
+        cam=bpy.context.scene.camera
+        ob=bpy.context.object
         return (ob.matrix_world @ vertex.co -
                 cam.matrix_world.translation).length
 
@@ -121,10 +129,13 @@ def paint_vertex_weights():
     vertex_group = bpy.context.object.vertex_groups.new(
         name=settings.group_name)
     bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
-    # Calculate min and max distance
+    # Determine min and max distance
     distances = [distance for distance in vertex_distances.values()]
     min_dist = min(distances)
     max_dist = max(distances)
+    if settings.use_tresholds:
+        min_dist = max(settings.weight_low_bound, min_dist)
+        max_dist = min(settings.weight_high_bound, max_dist)
     # Normalize
     for index in vertex_distances:
         distance = vertex_distances[index]
