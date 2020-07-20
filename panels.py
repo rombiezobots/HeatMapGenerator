@@ -41,11 +41,21 @@ class PROPERTIES_PT_heat_map_generator(bpy.types.Panel):
         sub_tresholds.enabled = settings.use_tresholds
         sub_tresholds.prop(settings, 'weight_low_bound')
         sub_tresholds.prop(settings, 'weight_high_bound')
+        lay.separator()
+        if not functions.active_object_is_local_mesh():
+            lay.label(text='Active object is not a local mesh.', icon='ERROR')
+        elif not functions.scene_has_active_camera():
+            lay.label(text='Scene has no active Camera.', icon='ERROR')
+        elif not functions.distance_dict_is_not_empty():
+            lay.label(text='Measure vertex distances first.', icon='ERROR')
+        elif not functions.active_vertex_group():
+            lay.label(text='There is no active Vertex Group.', icon='ERROR')
 
 
 ##############################################################################
 # Registration
 ##############################################################################
+
 
 register, unregister = bpy.utils.register_classes_factory([
     PROPERTIES_PT_heat_map_generator
