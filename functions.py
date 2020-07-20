@@ -91,16 +91,22 @@ def generate_heatmap():
     if settings.use_frame_step:
         step = scene.frame_step
 
-    # Let's go
+    # Report logs and start progress indicator
     log(f'Generating heat map {vertex_group.name} for object {settings.mesh.name}')
     log(f'Using start frame {start_frame}, end frame {end_frame}, and step {step}')
+    bpy.context.window_manager.progress_begin(0, 100)
+
     for i in range(start_frame, end_frame + 1, step):
         # Set the current frame (using the context is important for Blender to be aware of this)
         bpy.context.scene.frame_set(i)
         # Update vertex distance dict
         vertices = vertices_from_screen(vertices=vertices)
         # Update progress
-        log(f'Progress: {int((i - start_frame) / (end_frame - start_frame) * 100)}% (frame: {i})')
+        progress = int((i - start_frame) / (end_frame - start_frame) * 100)
+        bpy.context.window_manager.progress_update(progress)
+    # End progress indicator
+    bpy.context.window_manager.progress_end()
+    # Paint vertex weights
     assign_vertex_weights(vertex_group=vertex_group,
                           vertices=vertices)
 
