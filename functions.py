@@ -45,6 +45,17 @@ def painter_can_run() -> bool:
 def calculate_distances():
     """Create vertex group on target mesh with values based on distance to camera"""
 
+    def frame_range() -> tuple:
+        """Return the frame range based on whether we want the Scene settings or the Preview ones."""
+        scene = bpy.context.scene
+        settings = scene.heat_map_generator_settings
+        start_frame = scene.frame_start
+        end_frame = scene.frame_end
+        if settings.frame_range == 'preview':
+            start_frame = scene.frame_preview_start
+            end_frame = scene.frame_preview_end
+        return start_frame, end_frame
+
     def vertex_is_visible(vertex: bmesh.types.BMVert) -> bool:
         """Convert the vertex's coordinates into camera space, and check
         whether its X and Y coordinates are within the frustum, and its
@@ -78,13 +89,9 @@ def calculate_distances():
             area.spaces[0].region_3d.view_perspective = 'CAMERA'
     # Determine frame settings
     step = 1
-    start_frame = scene.frame_start
-    end_frame = scene.frame_end
-    if not settings.use_scene_start_end:
-        start_frame = settings.start_frame
-        end_frame = settings.end_frame
     if settings.use_frame_step:
         step = scene.frame_step
+    start_frame, end_frame = frame_range()
     # Report logs and start progress indicator
     log(f'Calculating vertex distances for object {settings.mesh.name}')
     log(f'Using start frame {start_frame}, end frame {end_frame}, and step {step}')

@@ -7,7 +7,7 @@ if 'functions' in locals():
     import importlib
     functions = importlib.reload(functions)
 else:
-    import HeatMapGenerator.functions
+    from HeatMapGenerator import functions
     import bpy
 
 
@@ -29,16 +29,14 @@ class Settings(bpy.types.PropertyGroup):
     group_name: bpy.props.StringProperty(name='New Vertex Group',
                                          default='HeatMap',
                                          options={'SKIP_SAVE'})
-    start_frame: bpy.props.IntProperty(name='Start frame',
-                                       default=bpy.context.scene.frame_start,
-                                       options={'SKIP_SAVE'})
-    end_frame: bpy.props.IntProperty(name='End frame',
-                                     default=bpy.context.scene.frame_end,
-                                     options={'SKIP_SAVE'})
-    use_scene_start_end: bpy.props.BoolProperty(name="Use Scene Values",
-                                                options={'SKIP_SAVE'},
-                                                default=True,
-                                                description='Use the Scene\'s start and end frame')
+    frame_range: bpy.props.EnumProperty(name='Frame Range',
+                                        items=[
+                                            ('output', 'Scene Output',
+                                             'Use the frame range defined in the Scene\'s output settings'),
+                                            ('preview', 'Timeline Preview',
+                                             'Use the Preview frame range defined in the Timeline')
+                                        ],
+                                        options={'SKIP_SAVE'})
 
 
 ##############################################################################
