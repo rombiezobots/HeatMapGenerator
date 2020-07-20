@@ -128,7 +128,9 @@ def calculate_distances():
     # End progress indicator
     wm.progress_end()
     # Go back to previous mode
-    bpy.ops.object.mode_set(mode=context_mode_remap[original_mode])
+    if context_mode_remap.get(original_mode):
+        original_mode = context_mode_remap[original_mode]
+    bpy.ops.object.mode_set(mode=original_mode)
     # Set tresholds
     settings = bpy.context.scene.heat_map_generator_settings
     settings.weight_low_bound = min(vertex_distances.values())
