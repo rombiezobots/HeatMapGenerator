@@ -21,25 +21,22 @@ vertex_distances = {}
 ###############################################################################
 
 
-def dont_use_scene_start_end_frames():
-    return not bpy.context.scene.heat_map_generator_settings.use_scene_start_end
+def active_object_is_local_mesh() -> bool:
+    active_ob = bpy.context.object
+    return active_ob and active_ob.type == 'MESH' and not active_ob.library
 
 
-def object_is_local_mesh(self, ob) -> bool:
-    return ob.type == 'MESH' and not ob.library
+def scene_has_active_camera() -> bool:
+    return bpy.context.scene.camera != None
 
 
-def generator_can_run() -> bool:
-    scene = bpy.context.scene
-    settings = scene.heat_map_generator_settings
-    return settings.mesh and settings.group_name and scene.camera
+def vertex_group_is_writable() -> bool:
+    settings = bpy.context.scene.heat_map_generator_settings
+    return settings.group_name != ''
 
 
-def painter_can_run() -> bool:
-    scene = bpy.context.scene
-    settings = scene.heat_map_generator_settings
-    # Need to check for distance dict and existing vertex group
-    return settings.mesh != None
+def distance_dict_is_not_empty() -> bool:
+    return len(vertex_distances) > 0
 
 
 def calculate_distances():
@@ -61,25 +58,21 @@ def calculate_distances():
         whether its X and Y coordinates are within the frustum, and its
         Z value between the clipping boundaries."""
         scene = bpy.context.scene
-        settings = scene.heat_map_generator_settings
+        cam = scene.camera
+        ob = bpy.context.object
         cs = scene.camera.data.clip_start
         ce = scene.camera.data.clip_end
         cc = world_to_camera_view(scene,
-                                  scene.camera,
-                                  settings.mesh.matrix_world @ v.co)
+                                  cam,
+                                  ob.matrix_world @ v.co)
         return 0.0 < cc.x < 1.0 and 0.0 < cc.y < 1.0 and cs < cc.z < ce
 
     def distance_to_camera(vertex: bmesh.types.BMVert) -> float:
         """Calculate the vertex's distance to the camera."""
-        scene = bpy.context.scene
-        settings = scene.heat_map_generator_settings
-        return (settings.mesh.matrix_world @ vertex.co -
-                scene.camera.matrix_world.translation).length
-
-    scene = bpy.context.scene
-    settings = scene.heat_map_generator_settings
-    # Set the active object
-    bpy.context.view_layer.objects.active = settings.mesh
+        cam = bpy.context.scene.camera
+        ob = bpy.context.object
+        return (ob.matrix_world @ vertex.co -
+                cam.matrix_world.translation).length
 
     # Clear the vertex distance dict
     vertex_distances.clear()
@@ -89,11 +82,11 @@ def calculate_distances():
             area.spaces[0].region_3d.view_perspective = 'CAMERA'
     # Determine frame settings
     step = 1
-    if settings.use_frame_step:
-        step = scene.frame_step
+    if bpy.context.scene.heat_map_generator_settings.use_frame_step:
+        step = bpy.context.scene.frame_step
     start_frame, end_frame = frame_range()
     # Report logs and start progress indicator
-    log(f'Calculating vertex distances for object {settings.mesh.name}')
+    log(f'Calculating vertex distances for object {bpy.context.object.name}')
     log(f'Using start frame {start_frame}, end frame {end_frame}, and step {step}')
     bpy.context.window_manager.progress_begin(0, 100)
 
@@ -103,7 +96,7 @@ def calculate_distances():
         bpy.context.scene.frame_set(i)
         # Get vertices from mesh
         bpy.ops.object.mode_set(mode='EDIT')
-        bmesh_data = bmesh.from_edit_mesh(settings.mesh.data)
+        bmesh_data = bmesh.from_edit_mesh(bpy.context.object.data)
         for v in bmesh_data.verts:
             if vertex_is_visible(vertex=v):
                 distance = distance_to_camera(vertex=v)
@@ -123,10 +116,10 @@ def calculate_distances():
 
 
 def paint_vertex_weights():
-    scene = bpy.context.scene
-    settings = scene.heat_map_generator_settings
+    settings = bpy.context.scene.heat_map_generator_settings
     # Create the vertex group
-    vertex_group = settings.mesh.vertex_groups.new(name=settings.group_name)
+    vertex_group = bpy.context.object.vertex_groups.new(
+        name=settings.group_name)
     bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
     # Calculate min and max distance
     distances = [distance for distance in vertex_distances.values()]

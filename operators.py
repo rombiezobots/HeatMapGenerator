@@ -25,7 +25,9 @@ class HEATMAPGENERATOR_OT_run(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return functions.generator_can_run()
+        ob_is_local_mesh = functions.active_object_is_local_mesh()
+        scene_has_camera = functions.scene_has_active_camera()
+        return ob_is_local_mesh and scene_has_camera
 
     def execute(self, context):
         functions.calculate_distances()
@@ -41,7 +43,10 @@ class HEATMAPGENERATOR_OT_paint(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return functions.painter_can_run()
+        ob_is_local_mesh = functions.active_object_is_local_mesh()
+        have_distances = functions.distance_dict_is_not_empty()
+        vertex_group_ok = functions.vertex_group_is_writable()
+        return ob_is_local_mesh and have_distances and vertex_group_ok
 
     def execute(self, context):
         functions.paint_vertex_weights()

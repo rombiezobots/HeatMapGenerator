@@ -17,11 +17,6 @@ else:
 
 
 class Settings(bpy.types.PropertyGroup):
-
-    mesh: bpy.props.PointerProperty(type=bpy.types.Object,
-                                    options={'SKIP_SAVE'},
-                                    name="Target Mesh",
-                                    poll=functions.object_is_local_mesh)
     use_frame_step: bpy.props.BoolProperty(name="Use Frame Step",
                                            options={'SKIP_SAVE'},
                                            default=True,
