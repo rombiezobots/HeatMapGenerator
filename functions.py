@@ -125,7 +125,7 @@ def calculate_distances():
                     vertex_distances[v.index] = distance
         # Update progress
         log(f'Frame: {i}')
-        progress = int((i - start_frame) / (end_frame - start_frame) * 100)
+        progress = int((i - start_frame) / (end_frame - start_frame + 1) * 100)
         wm.progress_update(progress)
 
     # Clean up the bmesh to lower memory impact
