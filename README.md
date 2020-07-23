@@ -16,7 +16,7 @@ Because you might want to tweak the mapping of the normalised vertex weights, pa
 - To reset the tresholds to the sampled extremes, simply toggle the Use Tresholds checkbox.
 
 ## To do
-- Occlusion, both by itself and by other objects
+- Occlusion from other objects
 - Vertex bleed control
 
 ## Acknowledgements
