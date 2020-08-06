@@ -66,16 +66,16 @@ def calculate_distances():
             return scene.frame_preview_start, scene.frame_preview_end
         return scene.frame_start, scene.frame_end
 
-    def visible_face_from_vertex(vertex: bpy.types.MeshVertex) -> bpy.types.MeshPolygon:
+    def visible_face_from_vertex(vertex: bpy.types.MeshVertex,
+                                 scene: bpy.types.Scene,
+                                 mesh_object: bpy.types.Object) -> bpy.types.MeshPolygon:
         """Convert the vertex's coordinates into camera space, and check
         whether its coordinates are within the frustum. Then cast a ray at it
         to see whether it's occluded."""
-        scene = bpy.context.scene
         cam = scene.camera
-        ob = bpy.context.object
         cc = world_to_camera_view(scene,
                                   cam,
-                                  ob.matrix_world @ vertex.co)
+                                  mesh_object.matrix_world @ vertex.co)
         cs = cam.data.clip_start
         ce = cam.data.clip_end
         # If the vertex's screen coordinates are within camera view
@@ -86,23 +86,26 @@ def calculate_distances():
             pixel_vector = Vector((cc.x, cc.y, top_left[2]))
             pixel_vector.rotate(cam.matrix_world.to_quaternion())
             # Convert to target object space
-            origin = ob.matrix_world.inverted() @ (pixel_vector + cam.matrix_world.translation)
-            # The ray's destination is the original vertex, in object space
-            destination = ob.matrix_world.inverted() @ vertex.co
+            wmatrix_inv = mesh_object.matrix_world.inverted()
+            origin = wmatrix_inv @ (pixel_vector +
+                                    cam.matrix_world.translation)
+            # Destination is the original vertex, in the same object space
+            destination = wmatrix_inv @ vertex.co
             direction = (destination - origin).normalized()
             # Cast a ray from those screen coordinates to the vertex
-            result, location, normal, index = ob.ray_cast(origin, direction)
+            result, location, normal, index = mesh_object.ray_cast(
+                origin, direction)
             if result and index > -1:
                 # Return the face the vertex belongs to
-                return ob.data.polygons[index]
+                return mesh_object.data.polygons[index]
         return False
 
-    def distance_to_camera(vertex: bpy.types.MeshVertex) -> float:
+    def distance_to_camera(vertex: bpy.types.MeshVertex,
+                           mesh_object: bpy.types.Object,
+                           camera_object: bpy.types.Object) -> float:
         """Calculate the vertex's distance to the camera."""
-        cam = bpy.context.scene.camera
-        ob = bpy.context.object
-        return (ob.matrix_world @ vertex.co -
-                cam.matrix_world.translation).length
+        return (mesh_object.matrix_world @ vertex.co -
+                camera_object.matrix_world.translation).length
 
     scene = bpy.context.scene
     ob = bpy.context.object
@@ -116,7 +119,9 @@ def calculate_distances():
     original_mode = bpy.context.mode
     # Report logs and start progress indicator
     log(f'Calculating vertex distances for object {ob.name}')
-    log(f'Using start frame {start_frame}, end frame {end_frame}, and step {scene.frame_step}')
+    log(f'Using start frame {start_frame},\
+    end frame {end_frame},\
+    and step {scene.frame_step}')
     wm.progress_begin(0, 100)
 
     # Loop over frames
@@ -128,12 +133,16 @@ def calculate_distances():
         # its distance to the camera. If it's lower than it ever has been, or
         # hasn't been in view before, store it in the vertex_distances dict.
         for vertex in ob.data.vertices:
-            visible_face = visible_face_from_vertex(vertex=vertex)
+            visible_face = visible_face_from_vertex(vertex=vertex,
+                                                    scene=scene,
+                                                    mesh_object=ob)
             if visible_face:
                 for vertex_id in visible_face.vertices:
                     vertex = ob.data.vertices[vertex_id]
                     known_vertex = vertex_distances.get(vertex_id)
-                    distance = distance_to_camera(vertex=vertex)
+                    distance = distance_to_camera(vertex=vertex,
+                                                  mesh_object=ob,
+                                                  camera_object=scene.camera)
                     if not known_vertex or distance < known_vertex:
                         vertex_distances[vertex_id] = distance
         # Update progress
