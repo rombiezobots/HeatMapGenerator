@@ -23,7 +23,9 @@ vertex_distances = {}
 
 def active_object_is_local_mesh() -> bool:
     active_ob = bpy.context.object
-    return active_ob and active_ob.type == 'MESH' and not active_ob.library
+    if active_ob:
+        return active_ob and active_ob.type == 'MESH' and not active_ob.library
+    return False
 
 
 def scene_has_active_camera() -> bool:
@@ -36,7 +38,9 @@ def distance_dict_is_not_empty() -> bool:
 
 def active_vertex_group() -> bool:
     active_ob = bpy.context.object
-    return active_ob.vertex_groups and active_ob.vertex_groups.active
+    if active_ob:
+        return active_ob.vertex_groups and active_ob.vertex_groups.active
+    return False
 
 
 def update_tresholds(self, context) -> None:
