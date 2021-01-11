@@ -23,6 +23,7 @@ class PROPERTIES_PT_heat_map_generator(bpy.types.Panel):
     bl_region_type = 'WINDOW'
     bl_parent_id = 'DATA_PT_vertex_groups'
     bl_context = 'data'
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         lay = self.layout
