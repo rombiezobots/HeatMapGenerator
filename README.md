@@ -18,6 +18,7 @@ Because you might want to tweak the mapping of the normalised vertex weights, pa
 ## To do
 - Occlusion from other objects
 - Vertex bleed control
+- Bake vertex weights to image
 
 ## Acknowledgements
 Heat Map Generator is based on some work I did on a similar tool, originally written in 2016 for Maya, by Zeno Pelgrims and Wim Coene at Grid VFX.
